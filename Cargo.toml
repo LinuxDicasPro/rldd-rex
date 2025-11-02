@@ -1,0 +1,18 @@
+[package]
+name = "rldd-rex"
+version = "1.0.0"
+edition = "2024"
+license = "MIT"
+description = "Recursive library dependency detector for ELF binaries (no external deps)"
+
+[dependencies]
+goblin = "0.10"
+memmap2 = "0.9"
+glob = "0.3"
+
+[features]
+default = []
+enable_ld_library_path = []
+
+[dev-dependencies]
+rldd-rex = { path = ".", features = ["enable_ld_library_path"] }

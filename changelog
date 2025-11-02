@@ -1,0 +1,6 @@
+Sun Nov  2 20:36:13 -03 2025:
+    - first version.
+    - support linux, bsd, solaris.
+    - search recursive dependencies.
+    - features for LD_LIBRARY_PATH.
+    - options for arch and binary type.
