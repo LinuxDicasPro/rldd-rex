@@ -2,7 +2,7 @@ use super::*;
 
 #[test]
 fn test_verbose_deps() -> Result<(), Box<dyn std::error::Error>> {
-    let select = 6;
+    let select = 1;
 
     #[cfg(feature = "enable_ld_library_path")]
     {

@@ -38,7 +38,7 @@ pub enum ElfType {
 }
 
 #[derive(Debug)]
-pub struct RlddVerboseInfo {
+pub struct RlddRexInfo {
     pub arch: ElfArch,
     pub elf_type: ElfType,
     pub deps: Vec<(String, String)>,
@@ -68,7 +68,7 @@ impl ElfType {
     }
 }
 
-pub fn get_elf_type(elf: &Elf) -> ElfType {
+fn get_elf_type(elf: &Elf) -> ElfType {
     match elf.header.e_type {
         ET_EXEC => {
             if elf.dynamic.is_some() {
@@ -101,7 +101,7 @@ fn machine_from_e_machine(e_machine: u16) -> ElfMachine {
 }
 
 #[cfg(any(target_os = "linux", target_os = "solaris"))]
-pub fn read_ld_so_conf() -> io::Result<Vec<PathBuf>> {
+fn read_ld_so_conf() -> io::Result<Vec<PathBuf>> {
     let mut collected = Vec::new();
     let mut seen = HashSet::new();
 
@@ -290,8 +290,8 @@ fn open_and_map(path: &impl AsRef<Path>) -> io::Result<Mmap> {
     Ok(map)
 }
 
-fn empty_info() -> RlddVerboseInfo {
-    RlddVerboseInfo {
+fn empty_info() -> RlddRexInfo {
+    RlddRexInfo {
         arch: ElfArch::Unknown,
         elf_type: ElfType::Invalid,
         deps: Vec::new(),
@@ -388,7 +388,7 @@ fn inner(
     Ok(())
 }
 
-pub fn rldd_rex<P: AsRef<Path> + std::fmt::Debug>(path: P) -> io::Result<RlddVerboseInfo> {
+pub fn rldd_rex<P: AsRef<Path> + std::fmt::Debug>(path: P) -> io::Result<RlddRexInfo> {
     let (mut libs, mut visited) = (HashSet::new(), HashSet::new());
     let mut res = Vec::new();
 
@@ -417,7 +417,7 @@ pub fn rldd_rex<P: AsRef<Path> + std::fmt::Debug>(path: P) -> io::Result<RlddVer
 
     inner(path.as_ref(), &elf, &mut visited, &mut libs, &mut res, &search_dirs, arch, 0)?;
 
-    Ok(RlddVerboseInfo { arch, elf_type, deps: res })
+    Ok(RlddRexInfo { arch, elf_type, deps: res })
 }
 
 #[cfg(test)]

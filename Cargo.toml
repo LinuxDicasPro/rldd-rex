@@ -1,6 +1,6 @@
 [package]
 name = "rldd-rex"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
 description = "Minimalistic recursive ELF dependency resolver for Linux, BSDs, and Solaris."
 authors = ["mxnt <m10ferrari1200@gmail.com>"]

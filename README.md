@@ -94,7 +94,8 @@ adding extra search directories for ELF libraries.
 
 ## License
 
-This project is licensed under the **MIT License**. See the `LICENSE` file for details.
+This project is licensed under the **MIT License**. See the
+[LICENSE](https://choosealicense.com/licenses/mit/) file for details.
 
 ## Contributing
 
