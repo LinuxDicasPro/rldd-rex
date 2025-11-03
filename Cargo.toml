@@ -2,8 +2,13 @@
 name = "rldd-rex"
 version = "1.0.0"
 edition = "2024"
+description = "Minimalistic recursive ELF dependency resolver for Linux, BSDs, and Solaris."
+authors = ["mxnt <m10ferrari1200@gmail.com>"]
 license = "MIT"
-description = "Recursive library dependency detector for ELF binaries (no external deps)"
+repository = "https://github.com/LinuxDicasPro/rldd-rex"
+readme = "README.md"
+keywords = ["elf", "ldd", "rldd", "rust", "linux", "rex"]
+categories = ["development-tools"]
 
 [dependencies]
 goblin = "0.10"
