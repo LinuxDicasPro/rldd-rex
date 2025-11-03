@@ -7,7 +7,7 @@ authors = ["mxnt <m10ferrari1200@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/LinuxDicasPro/rldd-rex"
 readme = "README.md"
-keywords = ["elf", "ldd", "rldd", "rust", "linux", "rex"]
+keywords = ["elf", "ldd", "rldd", "rust", "linux"]
 categories = ["development-tools"]
 
 [dependencies]
