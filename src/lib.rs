@@ -9,7 +9,7 @@ use std::io;
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 
-const MAX_DEPTH: usize = 500;
+const MAX_DEPTH: usize = 512;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ElfArch {

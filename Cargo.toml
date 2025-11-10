@@ -1,6 +1,6 @@
 [package]
 name = "rldd-rex"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2024"
 description = "Minimalistic recursive ELF dependency resolver for Linux, BSDs, and Solaris."
 authors = ["mxnt <m10ferrari1200@gmail.com>"]
@@ -11,12 +11,11 @@ keywords = ["elf", "ldd", "rldd", "rust", "linux"]
 categories = ["development-tools"]
 
 [dependencies]
-goblin = "0.10"
-memmap2 = "0.9"
+goblin = { version = "0.10", default-features = false, features = ["elf32", "elf64", "endian_fd"]}
+memmap2 = { version = "0.9", default-features = false }
 glob = "0.3"
 
 [features]
-default = []
 enable_ld_library_path = []
 
 [dev-dependencies]
