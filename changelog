@@ -1,5 +1,10 @@
+Sun Dec 14 15:07:02 -03 2025:
+    - fix search search dependencies for musl binaries
+    - search correct interpreter for musl
+    - update version 1.0.3
 Mon Nov 10 20:45:59 -03 2025:
     - optimize dependencies
+    - update version 1.0.2
 Mon Nov  3 00:06:50 -03 2025:
     - fix no public functions
     - fix readme

@@ -10,6 +10,8 @@ fn test_verbose_deps() -> Result<(), Box<dyn std::error::Error>> {
         unsafe { std::env::set_var("LD_LIBRARY_PATH", ld_path); }
     }
 
+    let home = env!("HOME");
+
     let path = match select {
         1 => "/bin/ls",
         2 => "/etc/os-release",
@@ -17,6 +19,7 @@ fn test_verbose_deps() -> Result<(), Box<dyn std::error::Error>> {
         4 => "/usr/lib/libcuda.so.570.169",
         5 => "/usr/lib64/libcuda.so.570.169",
         6 => "/usr/bin/ocenaudio",
+        7 => &format!("{}/.ALPack/bin/busybox", home),
         _ => panic!("Seleção inválida"),
     };
 

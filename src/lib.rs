@@ -233,27 +233,36 @@ fn build_search_dirs(elf: &Elf, arch: ElfArch, machine: ElfMachine) -> Vec<PathB
         }
     }
 
-    #[cfg(any(target_os = "linux", target_os = "solaris"))]
-    if let Some(i) = elf.interpreter {
-        let i_path = Path::new(i);
-        if i_path.exists() {
-            if let Err(e) = read_ld_so_conf().map(|ld_dirs| dirs.extend(ld_dirs)) {
-                eprintln!("Error reading ld.so.conf: {}", e);
-            }
-        } else {
-            eprintln!("ELF interpreter not found: {:?}", i_path);
-        }
-    }
+    let is_musl = if let Some(interp) = elf.interpreter {
+        interp.contains("musl")
+    } else {
+        false
+    };
 
-    dirs.extend(default_dirs_for_arch_and_machine(arch, machine));
+    if is_musl {
+        let musl_conf = Path::new("/etc/ld-musl-x86_64.path");
+        if musl_conf.exists() {
+            if let Ok(content) = fs::read_to_string(musl_conf) {
+                for line in content.lines() {
+                    let trim = line.trim();
+                    if !trim.is_empty() {
+                        dirs.push(PathBuf::from(trim));
+                    }
+                }
+            }
+        }
+    } else {
+        #[cfg(any(target_os = "linux", target_os = "solaris"))]
+        if let Err(e) = read_ld_so_conf().map(|ld_dirs| dirs.extend(ld_dirs)) {
+            eprintln!("Error reading ld.so.conf: {}", e);
+        }
+        dirs.extend(default_dirs_for_arch_and_machine(arch, machine));
+    }
 
     let mut uniq = Vec::new();
     let mut seen = HashSet::new();
     for d in dirs {
-        let path = match d.canonicalize() {
-            Ok(p) => p,
-            Err(_) => d.clone(),
-        };
+        let path = d.canonicalize().unwrap_or(d);
         if seen.insert(path.clone()) {
             uniq.push(path);
         }
@@ -354,26 +363,30 @@ fn inner(
     }
 
     let deps: Vec<_> = elf.libraries.iter().map(ToString::to_string).collect();
-    let paths: Vec<_> = elf.rpaths.iter().chain(&elf.runpaths)
+    let paths: Vec<_> = elf
+        .rpaths
+        .iter()
+        .chain(&elf.runpaths)
         .map(|s| resolve_origin(path, s))
         .collect();
 
     for dep in deps {
-        if !seen_libs.insert(dep.clone()) { continue; }
+        if !seen_libs.insert(dep.clone()) {
+            continue;
+        }
 
         let display = find_library(&dep, dirs, &paths)
             .map(|found| {
                 if let Ok(map) = open_and_map(&found) {
                     if let Ok(s_elf) = Elf::parse(&map) {
-
                         #[cfg(feature = "enable_ld_library_path")]
                         if !is_same_arch(arch, &s_elf) {
                             return "arch mismatch".into(); // Retorna aqui direto
                         }
 
-                        if let Err(e) = inner(
-                            &found, &s_elf, visited, seen_libs, res, dirs, arch, d + 1
-                        ) {
+                        if let Err(e) =
+                            inner(&found, &s_elf, visited, seen_libs, res, dirs, arch, d + 1)
+                        {
                             eprintln!("Recursive error {:?}: {:?}", found, e);
                         }
                     }
@@ -412,12 +425,46 @@ pub fn rldd_rex<P: AsRef<Path> + std::fmt::Debug>(path: P) -> io::Result<RlddRex
     let machine = machine_from_e_machine(elf.header.e_machine);
     let elf_type = get_elf_type(&elf);
 
+    if let Some(interp) = elf.interpreter {
+        if interp.contains("musl") {
+            let interp_path = PathBuf::from(interp);
+
+            let resolved_interp = if interp_path.exists() {
+                interp_path.canonicalize().unwrap_or(interp_path.clone())
+            } else {
+                interp_path.clone()
+            };
+
+            let lib_name = interp_path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or(interp)
+                .to_string();
+
+            res.push((lib_name.clone(), resolved_interp.display().to_string()));
+            libs.insert(lib_name);
+        }
+    }
+
     let mut search_dirs = build_search_dirs(&elf, arch, machine);
     search_dirs.extend(extra_lib_dirs_for_bin(path.as_ref()));
 
-    inner(path.as_ref(), &elf, &mut visited, &mut libs, &mut res, &search_dirs, arch, 0)?;
+    inner(
+        path.as_ref(),
+        &elf,
+        &mut visited,
+        &mut libs,
+        &mut res,
+        &search_dirs,
+        arch,
+        0,
+    )?;
 
-    Ok(RlddRexInfo { arch, elf_type, deps: res })
+    Ok(RlddRexInfo {
+        arch,
+        elf_type,
+        deps: res,
+    })
 }
 
 #[cfg(test)]
